@@ -1,0 +1,17 @@
+#!/bin/bash
+
+declare -a cydia
+cydia=($CYDIA)
+
+if [[ $1 == install ]];then
+	AutoHDRInstaller
+	if [ $? = 0 ]; then
+		if [[ ${CYDIA+@} ]];then
+			echo "You may need to reboot."
+    		eval "echo 'finish:restart' >&${cydia[0]}"
+	fi
+		exit 0
+	else
+		exit 1
+	fi
+fi

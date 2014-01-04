@@ -1,0 +1,9 @@
+Package: org.thebigboss.autohdrenabler
+Name: Auto HDR Enabler
+Depends: firmware (>= 7.1)
+Conflicts: cy+model.iphone (>= 6), gsc.ipad
+Version: 1.0
+Architecture: iphoneos-arm
+Description: enable Auto HDR mode for unsupported iOS 7.1 iDevices.
+Author: PoomSmart
+Section: Tweaks
