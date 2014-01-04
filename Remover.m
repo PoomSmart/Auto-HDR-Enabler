@@ -35,8 +35,8 @@
 	if (portTypeBack == nil) return NO;
 	NSMutableDictionary *portTypeFront = [[tuningParameters objectForKey:PORT_TYPE_FRONT] mutableCopy];
 	if (portTypeFront == nil) return NO;
-    NSMutableDictionary *defaultSensorIDs = [[tuningParameters objectForKey:DEFAULT_SENSOR_ID] mutableCopy];
-    if (defaultSensorIDs == nil) return NO;
+	NSMutableDictionary *defaultSensorIDs = [[tuningParameters objectForKey:DEFAULT_SENSOR_ID] mutableCopy];
+	if (defaultSensorIDs == nil) return NO;
 	NSString *portTypeFrontString = (NSString *)[defaultSensorIDs objectForKey:PORT_TYPE_FRONT];
 	if (portTypeFrontString == nil) return NO;
 	NSString *portTypeBackString = (NSString *)[defaultSensorIDs objectForKey:PORT_TYPE_BACK];
@@ -64,9 +64,9 @@
 	[root writeToFile:platformPathWithFile atomically:YES];
 	
 	NSString *avSession = [NSString stringWithFormat:AVCAP_SESSION_PLIST, modelFile];
-    NSMutableDictionary *avRoot = [[NSMutableDictionary dictionaryWithContentsOfFile:avSession] mutableCopy];
-    if (avRoot == nil) return NO;
-    NSMutableArray *avCap = [[avRoot objectForKey:AVCAP] mutableCopy];
+	NSMutableDictionary *avRoot = [[NSMutableDictionary dictionaryWithContentsOfFile:avSession] mutableCopy];
+	if (avRoot == nil) return NO;
+	NSMutableArray *avCap = [[avRoot objectForKey:AVCAP] mutableCopy];
 	if (avCap == nil) return NO;
 	NSMutableDictionary *index0 = [[avCap objectAtIndex:0] mutableCopy];
 	if (index0 == nil) return NO;
@@ -75,7 +75,7 @@
 	[index0 removeObjectForKey:HDR_DETECTION];
 	if (![modelFile isEqualToString:@"N78a"])
 		[index1 removeObjectForKey:HDR_DETECTION];
-   	
+
 	[avCap replaceObjectAtIndex:0 withObject:index0];
 	[avCap replaceObjectAtIndex:1 withObject:index1];
 	[avRoot setObject:avCap forKey:AVCAP];
