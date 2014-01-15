@@ -1,28 +1,22 @@
-#import <Foundation/Foundation.h>
+#import <substrate.h>
 
-%hook PLCameraController
-
-- (BOOL)supportsHDRSuggestion
+Boolean (*old_MGGetBoolAnswer)(CFStringRef);
+Boolean replaced_MGGetBoolAnswer(CFStringRef string)
 {
-	return YES;
+	#define k(key) CFEqual(string, CFSTR(key))
+	if (k("RearFacingCameraAutoHDRCapability") || k("FrontFacingCameraAutoHDRCapability"))
+		return YES;
+	return old_MGGetBoolAnswer(string);
 }
 
-- (BOOL)supportsHDRSuggestionForCaptureDevice:(id)device
+
+%ctor
 {
-	return YES;
+	MSHookFunction(((BOOL *)MSFindSymbol(NULL, "_MGGetBoolAnswer")), (BOOL *)replaced_MGGetBoolAnswer, (BOOL **)&old_MGGetBoolAnswer);
 }
 
-- (BOOL)supportsHDRForDevice:(id)device mode:(int)mode
-{
-	return (mode == 0 || mode == 4) ? YES : %orig;
-}
-
-%end
 
 /*@interface CAMBottomBar : UIView
-@end
-
-@interface CAMTopBar : UIView
 @end
 
 %hook CAMBottomBar
@@ -35,7 +29,11 @@
 	return r;
 }
 
-// - (void)_layoutForHorizontalOrientation{%orig; self.frame = CGRectMake(0, 50,300,300);}
+// - (void)_layoutForHorizontalOrientation
+{
+	%orig;
+	self.frame = CGRectMake(0, 50,300,300);
+}
 
 %end
 
