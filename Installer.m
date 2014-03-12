@@ -49,10 +49,8 @@
 	
 	NSMutableDictionary *HDRDict = [[NSMutableDictionary dictionaryWithContentsOfFile:EXTERNAL_HDR_PLIST] mutableCopy];
 	if (HDRDict == nil) return NO;
-	if ([cameraPropertiesBack objectForKey:@"HDRscene_hist_exp"] == nil)
-		[cameraPropertiesBack addEntriesFromDictionary:HDRDict];
-	if ([cameraPropertiesFront objectForKey:@"HDRscene_hist_exp"] == nil)
-		[cameraPropertiesFront addEntriesFromDictionary:HDRDict];
+	[cameraPropertiesBack addEntriesFromDictionary:HDRDict];
+	[cameraPropertiesFront addEntriesFromDictionary:HDRDict];
 
 	[portTypeBack setObject:cameraPropertiesBack forKey:portTypeBackString];
 	[portTypeFront setObject:cameraPropertiesFront forKey:portTypeFrontString];
@@ -70,9 +68,9 @@
 	if (index0 == nil) return NO;
 	NSMutableDictionary *index1 = [[avCap objectAtIndex:1] mutableCopy];
 	if (index1 == nil) return NO;
-	[index0 setObject:[NSNumber numberWithBool:YES] forKey:HDR_DETECTION];
+	[index0 setObject:@YES forKey:HDR_DETECTION];
 	if (![modelFile isEqualToString:@"N78a"])
-		[index1 setObject:[NSNumber numberWithBool:YES] forKey:HDR_DETECTION];
+		[index1 setObject:@YES forKey:HDR_DETECTION];
 
 	[avCap replaceObjectAtIndex:0 withObject:index0];
 	[avCap replaceObjectAtIndex:1 withObject:index1];
@@ -85,13 +83,13 @@
 - (BOOL)install
 {
 	BOOL success = YES;
-	NSLog(@"Adding Auto HDR Parameters.");
+	PSLog(@"Adding Auto HDR Parameters.");
 	success = [self addHDRParam];
 	if (!success) {
-		NSLog(@"Failed adding parameters.");
+		PSLog(@"Failed adding parameters.");
 		return success;
 	}
-	NSLog(@"Done!");
+	PSLog(@"Done!");
 	return success;
 }
 

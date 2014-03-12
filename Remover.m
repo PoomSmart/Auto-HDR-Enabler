@@ -47,13 +47,12 @@
 	cameraPropertiesBack = [[portTypeBack objectForKey:portTypeBackString] mutableCopy];
 	cameraPropertiesFront = [[portTypeFront objectForKey:portTypeFrontString] mutableCopy];
 	
-	for (NSString *keyName in [cameraPropertiesBack allKeys]) {
-		if ([keyName hasPrefix:@"HDR"])
+	NSArray *keyArray = [cameraPropertiesBack allKeys];
+	for (NSString *keyName in keyArray) {
+		if ([keyName hasPrefix:@"HDR"]) {
 			[cameraPropertiesBack removeObjectForKey:keyName];
-	}
-	for (NSString *keyName in [cameraPropertiesFront allKeys]) {
-		if ([keyName hasPrefix:@"HDR"])
 			[cameraPropertiesFront removeObjectForKey:keyName];
+		}
 	}
 
 	[portTypeBack setObject:cameraPropertiesBack forKey:portTypeBackString];
@@ -87,13 +86,13 @@
 - (BOOL)uninstall
 {
 	BOOL success = YES;
-	NSLog(@"Removing Auto HDR Parameters.");
+	PSLog(@"Removing Auto HDR Parameters.");
 	success = [self removeHDRParam];
 	if (!success) {
-		NSLog(@"Failed removing parameters.");
+		PSLog(@"Failed removing parameters.");
 		return success;
 	}
-	NSLog(@"Done!");
+	PSLog(@"Done!");
 	return success;
 }
 

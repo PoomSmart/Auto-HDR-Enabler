@@ -10,6 +10,7 @@
 #define AVCAP @"AVCaptureDevices"
 #define CAM_SETUP_PLIST @"/System/Library/Frameworks/MediaToolbox.framework/%@/CameraSetup.plist"
 #define AVCAP_SESSION_PLIST @"/System/Library/Frameworks/MediaToolbox.framework/%@/AVCaptureSession.plist"
+#define PSLog(...) printf("%s\n", [[NSString stringWithFormat:__VA_ARGS__] UTF8String])
 
 @interface AutoHDRInstaller : NSObject
 @end
