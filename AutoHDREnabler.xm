@@ -9,52 +9,36 @@ Boolean replaced_MGGetBoolAnswer(CFStringRef string)
 	return old_MGGetBoolAnswer(string);
 }
 
+%hook AVCaptureDevice
 
-%ctor
+- (BOOL)isHighDynamicRangeSceneDetectionSupported
 {
-	MSHookFunction(((BOOL *)MSFindSymbol(NULL, "_MGGetBoolAnswer")), (BOOL *)replaced_MGGetBoolAnswer, (BOOL **)&old_MGGetBoolAnswer);
-}
-
-
-/*@interface CAMBottomBar : UIView
-@end
-
-%hook CAMBottomBar
-
-// {320,101.5}
-- (CGSize)sizeThatFits:(CGSize)fits
-{
-	CGSize r = %orig;
-	NSLog(@"%@ to %@", NSStringFromCGSize(fits), NSStringFromCGSize(r));
-	return r;
-}
-
-// - (void)_layoutForHorizontalOrientation
-{
-	%orig;
-	self.frame = CGRectMake(0, 50,300,300);
+	return YES;
 }
 
 %end
 
-%hook CAMTopBar
+%hook AVCaptureFigVideoDevice
 
-- (CGSize)sizeThatFits:(CGSize)fits
+- (BOOL)isHighDynamicRangeScene
 {
-	CGSize r = %orig;
-	NSLog(@"%@ to %@", NSStringFromCGSize(fits), NSStringFromCGSize(r));
-	return r;
+	return YES;
 }
 
-- (void)HDRButtonWillExpand:(id)ex
+- (void)_setHighDynamicRangeScene:(BOOL)yes
 {
-	%orig;
-	self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width + 50, self.frame.size.height);
-}
-- (void)HDRButtonDidCollapse:(id)co
-{
-	%orig;
-	self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width - 50, self.frame.size.height);
+	%orig(YES);
 }
 
-%end*/
+- (BOOL)_setHighDynamicRangeSceneDetectionEnabled:(BOOL)arg1
+{
+	return YES;
+}
+
+%end
+
+%ctor
+{
+	%init;
+	MSHookFunction(((BOOL *)MSFindSymbol(NULL, "_MGGetBoolAnswer")), (BOOL *)replaced_MGGetBoolAnswer, (BOOL **)&old_MGGetBoolAnswer);
+}

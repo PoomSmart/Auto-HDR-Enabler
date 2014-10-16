@@ -26,6 +26,7 @@
 - (BOOL)addHDRParam
 {
 	NSString *modelFile = [self modelFile];
+	BOOL isN78a = [modelFile isEqualToString:@"N78a"];
 	NSString *platformPathWithFile = [NSString stringWithFormat:CAM_SETUP_PLIST, modelFile];
 	NSMutableDictionary *root = [[NSDictionary dictionaryWithContentsOfFile:platformPathWithFile] mutableCopy];
 	if (root == nil) return NO;
@@ -35,25 +36,21 @@
 	if (portTypeBack == nil) return NO;
 	NSMutableDictionary *portTypeFront = [[tuningParameters objectForKey:PORT_TYPE_FRONT] mutableCopy];
 	if (portTypeFront == nil) return NO;
-	NSMutableDictionary *defaultSensorIDs = [[tuningParameters objectForKey:DEFAULT_SENSOR_ID] mutableCopy];
-	if (defaultSensorIDs == nil) return NO;
-	NSString *portTypeFrontString = (NSString *)[defaultSensorIDs objectForKey:PORT_TYPE_FRONT];
-	if (portTypeFrontString == nil) return NO;
-	NSString *portTypeBackString = (NSString *)[defaultSensorIDs objectForKey:PORT_TYPE_BACK];
-	if (portTypeBackString == nil) return NO;
-	
-	NSMutableDictionary *cameraPropertiesFront = nil;
-	NSMutableDictionary *cameraPropertiesBack = nil;
-	cameraPropertiesBack = [[portTypeBack objectForKey:portTypeBackString] mutableCopy];
-	cameraPropertiesFront = [[portTypeFront objectForKey:portTypeFrontString] mutableCopy];
 	
 	NSMutableDictionary *HDRDict = [[NSMutableDictionary dictionaryWithContentsOfFile:EXTERNAL_HDR_PLIST] mutableCopy];
 	if (HDRDict == nil) return NO;
-	[cameraPropertiesBack addEntriesFromDictionary:HDRDict];
-	[cameraPropertiesFront addEntriesFromDictionary:HDRDict];
-
-	[portTypeBack setObject:cameraPropertiesBack forKey:portTypeBackString];
-	[portTypeFront setObject:cameraPropertiesFront forKey:portTypeFrontString];
+	
+	for (NSString *key in [portTypeBack allKeys]) {
+		NSMutableDictionary *properties = [[portTypeBack objectForKey:key] mutableCopy];
+		[properties addEntriesFromDictionary:HDRDict];
+		[portTypeBack setObject:properties forKey:key];
+	}
+	for (NSString *key in [portTypeFront allKeys]) {
+		NSMutableDictionary *properties = [[portTypeFront objectForKey:key] mutableCopy];
+		[properties addEntriesFromDictionary:HDRDict];
+		[portTypeFront setObject:properties forKey:key];
+	}
+	
 	[tuningParameters setObject:portTypeBack forKey:PORT_TYPE_BACK];
 	[tuningParameters setObject:portTypeFront forKey:PORT_TYPE_FRONT];
 	[root setObject:tuningParameters forKey:TUNING_PARAM];
@@ -66,14 +63,15 @@
 	if (avCap == nil) return NO;
 	NSMutableDictionary *index0 = [[avCap objectAtIndex:0] mutableCopy];
 	if (index0 == nil) return NO;
-	NSMutableDictionary *index1 = [[avCap objectAtIndex:1] mutableCopy];
-	if (index1 == nil) return NO;
-	[index0 setObject:@YES forKey:HDR_DETECTION];
-	if (![modelFile isEqualToString:@"N78a"])
+	if (!isN78a) {
+		NSMutableDictionary *index1 = [[avCap objectAtIndex:1] mutableCopy];
+		if (index1 == nil) return NO;
 		[index1 setObject:@YES forKey:HDR_DETECTION];
-
+		[avCap replaceObjectAtIndex:1 withObject:index1];
+	}
+	[index0 setObject:@YES forKey:HDR_DETECTION];
 	[avCap replaceObjectAtIndex:0 withObject:index0];
-	[avCap replaceObjectAtIndex:1 withObject:index1];
+
 	[avRoot setObject:avCap forKey:AVCAP];
 	[avRoot writeToFile:avSession atomically:YES];
 
