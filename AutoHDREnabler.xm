@@ -1,12 +1,26 @@
 #import <substrate.h>
+#import <AVFoundation/AVFoundation.h>
+#import "../PS.h"
 
-Boolean (*old_MGGetBoolAnswer)(CFStringRef);
-Boolean replaced_MGGetBoolAnswer(CFStringRef string)
+extern "C" Boolean MGGetBoolAnswer(CFStringRef);
+
+@interface CAMCameraView : UIView
+- (NSInteger)_HDRMode;
+@end
+
+@interface CAMCaptureController : NSObject
+@property int cameraMode;
++ (BOOL)isStillImageMode:(int)mode;
+- (CAMCameraView *)delegate;
+- (void)_suggestedHDRChanged;
+@end
+
+MSHook(Boolean, MGGetBoolAnswer, CFStringRef string)
 {
 	#define k(key) CFEqual(string, CFSTR(key))
 	if (k("RearFacingCameraAutoHDRCapability") || k("FrontFacingCameraAutoHDRCapability"))
 		return YES;
-	return old_MGGetBoolAnswer(string);
+	return _MGGetBoolAnswer(string);
 }
 
 %hook AVCaptureDevice
@@ -18,27 +32,73 @@ Boolean replaced_MGGetBoolAnswer(CFStringRef string)
 
 %end
 
-%hook AVCaptureFigVideoDevice
+%hook AVCaptureDevice_FigRecorder
 
-- (BOOL)isHighDynamicRangeScene
-{
-	return YES;
-}
-
-- (void)_setHighDynamicRangeScene:(BOOL)yes
-{
-	%orig(YES);
-}
-
-- (BOOL)_setHighDynamicRangeSceneDetectionEnabled:(BOOL)arg1
+- (BOOL)isHighDynamicRangeSceneDetectionSupported
 {
 	return YES;
 }
 
 %end
 
+%hook AVCaptureFigVideoDevice
+
+- (BOOL)isHighDynamicRangeSceneDetectionSupported
+{
+	return YES;
+}
+
+%end
+
+%hook AVCaptureFigVideoDevice_FigRecorder
+
+- (BOOL)isHighDynamicRangeSceneDetectionSupported
+{
+	return YES;
+}
+
+%end
+
+CGFloat ISO;
+
+%hook CAMCaptureController
+
+- (BOOL)isHDRSuggested
+{
+	return ISO <= 400.0f;
+}
+
+- (BOOL)_setupCamera
+{
+	BOOL r = %orig;
+	[self addObserver:self forKeyPath:@"currentDevice.ISO" options:NSKeyValueObservingOptionNew context:@"PLCameraControllerSuggestedHDR2ObserverContext"];
+	return r;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	if ([keyPath isEqualToString:@"currentDevice.ISO"]) {
+		if ([[self delegate] _HDRMode] == 2 && [%c(CAMCaptureController) isStillImageMode:self.cameraMode]) {
+			ISO = [change[NSKeyValueChangeNewKey] floatValue];
+			[self _suggestedHDRChanged];
+		}
+	} else
+		%orig;
+}
+
+- (void)_destroyCamera
+{
+	if (MSHookIvar<AVCaptureSession *>(self, "_avCaptureSession") != nil)
+		[self removeObserver:self forKeyPath:@"currentDevice.ISO"];
+	%orig;
+}
+
+%end
+
+//FigCFCreatePropertyListFromBundleIdentifierOnPlatform // com.apple.MediaToolbox AVCaptureSession.plist
+
 %ctor
 {
-	%init;
-	MSHookFunction(((BOOL *)MSFindSymbol(NULL, "_MGGetBoolAnswer")), (BOOL *)replaced_MGGetBoolAnswer, (BOOL **)&old_MGGetBoolAnswer);
+	%init();
+	MSHookFunction(MGGetBoolAnswer, MSHake(MGGetBoolAnswer));
 }
