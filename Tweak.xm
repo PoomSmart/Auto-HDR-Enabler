@@ -3,18 +3,6 @@
 #import "../PS.h"
 
 extern "C" Boolean MGGetBoolAnswer(CFStringRef);
-
-@interface CAMCameraView : UIView
-- (NSInteger)_HDRMode;
-@end
-
-@interface CAMCaptureController : NSObject
-@property int cameraMode;
-+ (BOOL)isStillImageMode:(int)mode;
-- (CAMCameraView *)delegate;
-- (void)_suggestedHDRChanged;
-@end
-
 MSHook(Boolean, MGGetBoolAnswer, CFStringRef string)
 {
 	#define k(key) CFEqual(string, CFSTR(key))
@@ -99,6 +87,6 @@ CGFloat ISO;
 
 %ctor
 {
-	%init();
+	%init;
 	MSHookFunction(MGGetBoolAnswer, MSHake(MGGetBoolAnswer));
 }

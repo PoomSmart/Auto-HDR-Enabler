@@ -5,7 +5,7 @@ ARCHS = armv7 arm64
 include theos/makefiles/common.mk
 
 TWEAK_NAME = AutoHDREnabler
-AutoHDREnabler_FILES = AutoHDREnabler.xm
+AutoHDREnabler_FILES = Tweak.xm
 AutoHDREnabler_LIBRARIES = MobileGestalt
 
 include $(THEOS_MAKE_PATH)/tweak.mk
